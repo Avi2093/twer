@@ -1,0 +1,42 @@
+﻿@model JiraTicketingToolViewModel
+
+<div>
+    <label for="description-dropdown">Initiatives:</label>
+    @Html.DropDownListFor(m => m.SelectedDescription, Model.DescriptionSelectList, "Initiatives")
+</div>
+
+<div>
+    <label for="project-dropdown">Project List:</label>
+    @Html.DropDownListFor(m => m.SelectedProject, Model.ProjectSelectList, "ProjectList")
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            $('#SelectedDescription').on('change', function () {
+                var description = $(this).val();
+                if (description) {
+                    $.ajax({
+                        url: '@Url.Action("GetProjects", "JiraTicketingTool")',
+                        data: { description: description },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            var projectDropdown = $('#SelectedProject');
+                            projectDropdown.empty();
+                            projectDropdown.append($('<option>').text('ProjectList').attr('value', ''));
+                            $.each(data, function (index, item) {
+                                projectDropdown.append($('<option>').text(item.text).attr('value', item.value));
+                            });
+                        }
+                    });
+                }
+                else {
+                    var projectDropdown = $('#SelectedProject');
+                    projectDropdown.empty();
+                    projectDropdown.append($('<option>').text('ProjectList').attr('value', ''));
+                }
+            });
+        });
+    </script>
+}
