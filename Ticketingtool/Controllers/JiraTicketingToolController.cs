@@ -16,19 +16,19 @@ namespace Ticketingtool.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+         public IActionResult Index()
         {
             try
             {
-                // get all distinct descriptions where issuetype = Initiative from the database using stored procedure
+                // get all distinct descriptions where issuetype = Initiative from the database
                 var initiatives = _context.JiraTaskDetails
-                    .FromSqlRaw("EXECUTE sp_GetInitiativeList")
-                    .AsEnumerable()
-                    .Select(j => new SelectListItem { Value = j.description, Text = j.description })
+                    .Where(j => j.issuetype == "Initiative")
+                    .Select(j => j.description)
+                    .Distinct()
                     .ToList();
 
                 // create a select list for the description dropdown
-                var descriptionSelectList = new SelectList(initiatives, "Value", "Text");
+                var descriptionSelectList = new SelectList(initiatives);
 
                 // create a view model for the index view
                 var viewModel = new JiraTicketingToolViewModel
@@ -36,7 +36,6 @@ namespace Ticketingtool.Controllers
                     DescriptionSelectList = descriptionSelectList,
                     ProjectSelectList = new SelectList(new List<SelectListItem>())
                 };
-
 
                 return View(viewModel);
             }
@@ -46,7 +45,6 @@ namespace Ticketingtool.Controllers
                 return View("Error", errorViewModel);
             }
         }
-
         public IActionResult GetProjects(string description)
         {
             try
