@@ -20,6 +20,8 @@ namespace Ticketingtool.Models
 
             // This line configures the 'JiraTaskDetails' entity to not have a primary key
             // This is necessary because the 'JiraTaskDetails' table does not have a primary key column
+
+          
             modelBuilder.Entity<JiraTaskDetail>().HasNoKey();
         }
     }
