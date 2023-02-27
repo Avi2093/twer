@@ -67,5 +67,27 @@ namespace Ticketingtool.Controllers
                 return BadRequest("An error occurred while processing your request. Please try again later.");
             }
         }
+        public IActionResult GetEpics(string description, string project)
+        {
+            try
+            {
+                // get all distinct epic descriptions for the selected description and project where issuetype = Epic
+                var epics = _context.JiraTaskDetails
+                    .Where(j => j.description == description && j.jiraProjectName == project && j.issuetype == "Epic")
+                    .Select(j => j.description)
+                    .Distinct()
+                    .ToList();
+
+                // create a select list for the epic dropdown
+                var epicSelectList = new SelectList(epics);
+
+                // return the select list as JSON
+                return Json(epicSelectList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("An error occurred while processing your request. Please try again later.");
+            }
+        }
     }
 }
