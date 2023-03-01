@@ -50,13 +50,18 @@
         @Html.DropDownListFor(m => m.SelectedInitiative, Model.InitiativeSelectList, "Select an Initiative", new { @class = "js-select2" })
     </div>
     <div>
-        <label for="project-dropdown">Select a project<span class="required"></span></label>
+        <label for="project-dropdown">Project List<span class="required"></span></label>
         @Html.DropDownListFor(m => m.SelectedProject, Model.ProjectSelectList, "Select a project", new { @class = "js-select2" })
 
     </div>
     <div>
-        <label for="epic-dropdown">Select an epic<span class="required"></span></label>
+        <label for="epic-dropdown">Epic List<span class="required"></span></label>
         @Html.DropDownListFor(m => m.SelectedEpic, Model.EpicSelectList, "Select an epic", new { @class = "js-select2" })
+
+    </div>
+     <div>
+        <label for="Task-dropdown">Task List<span class="required"></span></label>
+        @Html.DropDownListFor(m => m.SelectedTask, Model.TaskSelectList, "Select a Task", new { @class = "js-select2" })
 
     </div>
 
@@ -108,9 +113,11 @@
                 }
             });
 
-            $('#SelectedProject').on('change', function () {
+            $('#SelectedProject').on('change', function () 
+            {
                 var InitiativeName = $('#SelectedInitiative').val();
                 var ProjectName = $(this).val();
+               
 
                 if (InitiativeName != "" && ProjectName != "") {
                     $.ajax({
@@ -136,6 +143,38 @@
                     epicDropdown.trigger('change');
                 }
             });
+
+            $('#SelectedEpic').on('change', function () {
+                var EpicName = $(this).val();
+                var ProjectName = $('#SelectedProject').val();
+               
+                 if (ProjectName != "" && EpicName != "") {
+                    $.ajax({
+                        url: '@Url.Action("GetTasks", "JiraTicketingTool")',
+                        data: { description: EpicName, project: ProjectName },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            var TaskDropdown = $('#SelectedTask');
+                            TaskDropdown.empty();
+                            TaskDropdown.append($('<option>').text('TaskList').attr('value', ''));
+                            $.each(data, function (index, item) {
+                                TaskDropdown.append($('<option>').text(item.text).attr('value', item.value));
+                            });
+                            TaskDropdown.trigger('change');
+                        }
+                    });
+                }
+                else {
+                    var TaskDropdown = $('#SelectedTask');
+                    TaskDropdown.empty();
+                    TaskDropdown.append($('<option>').text('TaskList').attr('value', ''));
+                    TaskDropdown.trigger('change');
+                }
+            });
+
+           
+
         });
 
 
