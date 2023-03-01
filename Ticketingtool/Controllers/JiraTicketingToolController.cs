@@ -114,6 +114,40 @@ namespace Ticketingtool.Controllers
                 return BadRequest("An error occurred while processing your request. Please try again later.");
             }
         }
+        
+        // This action method retrieves a list of tasks for a given epic description and populates the task dropdown.
+        public IActionResult GetTasks(string description, string project)
+        {
+            try
+            {
+                // Get the parent key for the selected epic.
+                var parentKey = _context.JiraTaskDetails
+                    .Where(j => j.description == description && j.jiraProjectName == project)
+                    .Select(j => j.issueKey)
+                    .FirstOrDefault();
+
+                // Get all distinct task descriptions for the selected parent key, project, and issuetype = Story.
+                var tasks = _context.JiraTaskDetails
+                    .Where(j => j.parentKey == parentKey && j.jiraProjectName == project && j.issuetype == "Task")
+                    .Select(j => new SelectListItem
+                    {
+                        Value = j.description,
+                        Text = j.description
+                    })
+                    .Distinct()
+                    .ToList();
+
+                // Create a select list for the task dropdown.
+                var taskSelectList = new SelectList(tasks, "Value", "Text");
+
+                // Return the select list as JSON.
+                return Json(taskSelectList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("An error occurred while processing your request. Please try again later.");
+            }
+        }
 
 
     }
