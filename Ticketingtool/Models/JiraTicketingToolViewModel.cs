@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 
 namespace Ticketingtool.Models
 {
@@ -10,7 +11,17 @@ namespace Ticketingtool.Models
         public string SelectedReporter { get; set; }
         public SelectList ReporterSelectList { get; set; }
 
-        public string SelectedDescription { get; set; }
-        public SelectList DescriptionSelectList { get; set; }
+        public string SelectedInitiative { get; set; }
+        public SelectList InitiativeSelectList { get; set; }
+
+        public string SelectedEpic { get; set; }
+        public SelectList EpicSelectList { get; set; }
+        public string SelectedTask { get; set; }
+        public SelectList TaskSelectList { get; set; }
+        public string SelectedStory { get; set; }
+        public SelectList StorySelectList { get; set; }
+
+        public Boolean iSTaskOrStory { get; set; }
+
     }
 }
