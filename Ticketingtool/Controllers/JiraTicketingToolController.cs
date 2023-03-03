@@ -38,8 +38,14 @@ namespace Ticketingtool.Controllers
                 {
                     InitiativeSelectList = descriptionSelectList,
                     ProjectSelectList = new SelectList(new List<SelectListItem>()),
-                    EpicSelectList = new SelectList(new List<SelectListItem>()) // Initialize the third dropdown with an empty list.
+                    EpicSelectList = new SelectList(new List<SelectListItem>()), // Initialize the third dropdown with an empty list.
+                    TaskSelectList = new SelectList(new List<SelectListItem>()), // Initialize the fourth dropdown with an empty list.
+                    StorySelectList = new SelectList(new List<SelectListItem>())
+
                 };
+                //var taskSelectList = viewModel.TaskSelectList; // Temporary line to check value of TaskSelectList
+                //Console.WriteLine(taskSelectList);
+
 
                 // Render the index view with the view model.
                 return View(viewModel);
@@ -114,7 +120,8 @@ namespace Ticketingtool.Controllers
                 return BadRequest("An error occurred while processing your request. Please try again later.");
             }
         }
-        
+
+
         // This action method retrieves a list of tasks for a given epic description and populates the task dropdown.
         public IActionResult GetTasks(string description, string project)
         {
@@ -142,6 +149,40 @@ namespace Ticketingtool.Controllers
 
                 // Return the select list as JSON.
                 return Json(taskSelectList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("An error occurred while processing your request. Please try again later.");
+            }
+        }
+
+
+        public IActionResult GetStory(string description, string project)
+        {
+            try
+            {
+                // Get the parent key for the selected epic.
+                var parentKey = _context.JiraTaskDetails
+                    .Where(j => j.description == description && j.jiraProjectName == project)
+                    .Select(j => j.issueKey)
+                    .FirstOrDefault();
+
+                // Get all distinct task descriptions for the selected parent key, project, and issuetype = Story.
+                var story = _context.JiraTaskDetails
+                    .Where(j => j.parentKey == parentKey && j.jiraProjectName == project && j.issuetype == "Story")
+                    .Select(j => new SelectListItem
+                    {
+                        Value = j.description,
+                        Text = j.description
+                    })
+                    .Distinct()
+                    .ToList();
+
+                // Create a select list for the task dropdown.
+                var storySelectList = new SelectList(story, "Value", "Text");
+
+                // Return the select list as JSON.
+                return Json(storySelectList);
             }
             catch (Exception ex)
             {
