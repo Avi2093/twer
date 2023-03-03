@@ -1,0 +1,65 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
+using System.Text;
+using Newtonsoft.Json.Linq;
+
+
+namespace Ticketingtool.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class JiraPOSTAPIController : ControllerBase
+    {
+        [HttpPost]
+        [Route("api/create-issue")]
+        public async Task<IActionResult> CreateIssue([FromBody] JObject data)
+        {
+            // Get data from request body
+            string projectKey = data["fields"]["project"]["key"].ToString();
+            string summary = data["fields"]["summary"].ToString();
+            string description = data["fields"]["description"].ToString();
+            string issueTypeName = data["fields"]["issuetype"]["name"].ToString();
+            string parentKey = data["fields"]["parent"]["key"].ToString();
+
+            // Create the Jira issue JSON object
+            JObject newIssue = new JObject();
+            newIssue.Add("fields", new JObject(
+                new JProperty("project", new JObject(
+                    new JProperty("key", projectKey)
+                )),
+                new JProperty("summary", summary),
+                new JProperty("description", description),
+                new JProperty("issuetype", new JObject(
+                    new JProperty("name", issueTypeName)
+                ))
+            ));
+            if (!string.IsNullOrEmpty(parentKey))
+            {
+                newIssue["fields"].Add(new JProperty("parent", new JObject(
+                    new JProperty("key", parentKey)
+                )));
+            }
+
+
+            // Send a POST request to the Jira API endpoint
+            HttpClient client = new HttpClient();
+            string username = "your_username";
+            string password = "your_password";
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"))
+            );
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            string url = "https://geek1121.atlassian.net/rest/api/2/issue/";
+            var content = new StringContent(newIssue.ToString(), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.PostAsync(url, content);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            // Your code to handle the response will go here
+
+            return Ok(responseContent);
+        }
+
+
+    }
+}
