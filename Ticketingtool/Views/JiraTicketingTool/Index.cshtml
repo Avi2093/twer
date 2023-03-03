@@ -54,8 +54,8 @@
             width: 100%;
         }
 
-    .js-select2 {
-        width: 100%;
+    .js-select2, .select2-container {
+        width: 100% !important;
     }
 
 
@@ -65,12 +65,19 @@
         height: 1.2em;
         vertical-align: middle;
     }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
 </style>
 
 
 <div class="form-heading">Form</div>
 
-<form>
+<form method="post" action="@Url.Action("CreateJiraTicket", "JiraPOSTAPI")">
+
+
     <div>
         <label for="Initiative-dropdown">Initiatives<span class="required"></span></label>
         @Html.DropDownListFor(m => m.SelectedInitiative, Model.InitiativeSelectList, "Select an Initiative", new { @class = "js-select2" })
@@ -145,16 +152,31 @@
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModal();">Close</button>
                 </div>
             </div>
+
         </div>
+
+
+
+    </div>
+    <div class="form-group">
+        <label for="summary">Summary:</label>
+        <textarea id="summary" name="summary" rows="3" cols="50"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" rows="6" cols="50"></textarea>
     </div>
 
     <button type="button" class="btn btn-primary" onclick="resetPage()">Reset</button>
+    <button type="submit" class="btn btn-primary">Submit</button>
+
 </form>
 
 @section scripts {
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
- 
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
 
@@ -206,7 +228,8 @@
                             projectDropdown.empty();
                             projectDropdown.append($('<option>').attr('value', ''));
                             $.each(data, function (index, item) {
-                                projectDropdown.append($('<option>').text(item.text).attr('value', item.value));
+                                projectDropdown.append($('<option jiraKey="' + item.jiraProjectKey + '">').text(item.jiraProjectName).attr('value', item.jiraProjectName));
+
                             });
                             //projectDropdown.trigger('change');
                         }
@@ -236,7 +259,7 @@
                             epicDropdown.empty();
                             epicDropdown.append($('<option>').attr('value', ''));
                             $.each(data, function (index, item) {
-                                epicDropdown.append($('<option>').text(item.text).attr('value', item.value));
+                                epicDropdown.append($('<option issueKey="' + item.issueKey + '">').text(item.epicName).attr('value', item.epicName));
                             });
                             // epicDropdown.trigger('change');
                         }
@@ -266,9 +289,9 @@
                             TaskDropdown.empty();
                             TaskDropdown.append($('<option>').attr('value', 'select'));
                             $.each(data, function (index, item) {
-                                TaskDropdown.append($('<option>').text(item.text).attr('value', item.value));
+                                TaskDropdown.append($('<option issueKey="' + item.issueKey + '">').text(item.taskName).attr('value', item.taskName));
                             });
-                           // TaskDropdown.trigger('change');
+                            // TaskDropdown.trigger('change');
                             $('#SelectedStory').removeAttr("disabled", 'disabled');
 
                         }
@@ -304,9 +327,9 @@
                             TaskDropdown.empty();
                             TaskDropdown.append($('<option>').attr('value', ''));
                             $.each(data, function (index, item) {
-                                TaskDropdown.append($('<option>').text(item.text).attr('value', item.value));
+                                TaskDropdown.append($('<option issueKey="' + item.issueKey + '">').text(item.storyDesc).attr('value', item.storyDesc));
                             });
-                          //  TaskDropdown.trigger('change');
+                            //  TaskDropdown.trigger('change');
                             $('#SelectedStory').removeAttr("disabled", 'disabled');
 
                         }
@@ -323,6 +346,31 @@
 
 
         });
+
+        function submitDetails() {
+            var initiatives = $("#SelectedInitiative").find('option:selected').val();
+            var projectName = $("#SelectedProject").find('option:selected');
+            var projectJiraKey = projectName.attr('jiraKey');
+            projectName = projectName.val();
+            var epicName = $("#SelectedEpic").find('option:selected');
+            var epicIssueKey = epicName.attr('issueKey');
+            var formData = new FormData();
+
+            var taskelement = $("#SelectedTask").find('option:selected');
+            var taskOrStoryIssueKey = epicName.attr('issueKey');
+            // var storyIssueKey="";
+            if (taskelement.val() = 'select') {
+                var storylement = $("#SelectedStory").find('option:selected');
+                taskOrStoryIssueKey = storylement.attr('issueKey');
+            }
+            formData.append('initiatives', initiatives);
+            formData.append('projectName', projectName);
+            formData.append('projectJiraKey', projectJiraKey);
+            formData.append('epicIssueKey', epicIssueKey);
+            formData.append('taskOrStoryIssueKey', taskOrStoryIssueKey);
+
+            console.log(initiatives, projectName, projectJiraKey, epicIssueKey, taskOrStoryIssueKey);
+        }
 
 
     </script>
