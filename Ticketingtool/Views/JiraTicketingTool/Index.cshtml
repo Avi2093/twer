@@ -75,7 +75,7 @@
 
 <div class="form-heading">Form</div>
 
-<form method="post" action="@Url.Action("CreateJiraTicket", "JiraPOSTAPI")">
+<form action="@Url.Action("CreateJiraTicket", "JiraTicketingTool")" method="post">
 
 
     <div>
@@ -158,18 +158,27 @@
 
 
     </div>
-    <div class="form-group">
-        <label for="summary">Summary:</label>
-        <textarea id="summary" name="summary" rows="3" cols="50"></textarea>
+
+    <div class="row">
+            <div class="col-6">
+                <div class="form-group">
+                    <label for="summary">Summary:</label>
+                    <textarea id="summary" name="summary" rows="3" cols="50"></textarea>
+                </div>
+               
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" rows="6" cols="50"></textarea>
+                </div>
+            </div>
+        
     </div>
 
-    <div class="form-group">
-        <label for="description">Description:</label>
-        <textarea id="description" name="description" rows="6" cols="50"></textarea>
-    </div>
 
     <button type="button" class="btn btn-primary" onclick="resetPage()">Reset</button>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <input type="submit" class="btn btn-primary" value="Submit" />
 
 </form>
 
@@ -348,6 +357,8 @@
         });
 
         function submitDetails() {
+            console.log('1');
+            // $("#SubmitButton").on("click", submitDetails);
             var initiatives = $("#SelectedInitiative").find('option:selected').val();
             var projectName = $("#SelectedProject").find('option:selected');
             var projectJiraKey = projectName.attr('jiraKey');
@@ -359,19 +370,31 @@
             var taskelement = $("#SelectedTask").find('option:selected');
             var taskOrStoryIssueKey = epicName.attr('issueKey');
             // var storyIssueKey="";
-            if (taskelement.val() = 'select') {
+            if (taskelement.val() == 'select') {
                 var storylement = $("#SelectedStory").find('option:selected');
                 taskOrStoryIssueKey = storylement.attr('issueKey');
             }
-            formData.append('initiatives', initiatives);
-            formData.append('projectName', projectName);
-            formData.append('projectJiraKey', projectJiraKey);
-            formData.append('epicIssueKey', epicIssueKey);
-            formData.append('taskOrStoryIssueKey', taskOrStoryIssueKey);
+            //formData.append('initiatives', initiatives);
+            //formData.append('projectName', projectName);
+            //formData.append('projectJiraKey', projectJiraKey);
+            //formData.append('epicIssueKey', epicIssueKey);
+            //formData.append('taskOrStoryIssueKey', taskOrStoryIssueKey);
 
             console.log(initiatives, projectName, projectJiraKey, epicIssueKey, taskOrStoryIssueKey);
+
+            //  New code to send a post request with Basic Authentication
+            $.ajax({
+                url: '@Url.Action("CreateIssueInJira", "JiraTicketingTool")',
+                data: { initiatives: initiatives, projectJiraKey: projectJiraKey },
+                type: 'get',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data)
+                }
+            });
         }
 
 
     </script>
-}
+    }
+
