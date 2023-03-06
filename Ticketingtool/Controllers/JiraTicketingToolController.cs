@@ -4,6 +4,12 @@ using Ticketingtool.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using Newtonsoft.Json;
+using System.Text;
+using Atlassian.Jira;
+using Newtonsoft.Json.Linq;
+using RestSharp.Authenticators;
+using RestSharp;
 
 namespace Ticketingtool.Controllers
 {
@@ -45,8 +51,7 @@ namespace Ticketingtool.Controllers
                 };
                 //var taskSelectList = viewModel.TaskSelectList; // Temporary line to check value of TaskSelectList
                 //Console.WriteLine(taskSelectList);
-
-
+                 
                 // Render the index view with the view model.
                 return View(viewModel);
             }
@@ -65,7 +70,8 @@ namespace Ticketingtool.Controllers
             {
                 // Get all distinct jiraProjectName values for the selected description.
                 var projects = _context.JiraTaskDetails
-                    .Where(j => j.description == description)
+                    //.Where(j => j.description == description)
+                    .Where(j => j.description.Contains(description))
                     .Select(j => new JiraTaskDetail
                     {
                         jiraProjectName = j.jiraProjectName,
@@ -191,7 +197,86 @@ namespace Ticketingtool.Controllers
             }
         }
 
+        [HttpPost]
+        public IActionResult CreateJiraTicket(string initiatives, string projectJiraKey)
+        {
+            try
+            {
 
+                string username = "officialidofmine1993@gmail.com";
+                string password = "ATATT3xFfGF034gHZbx9fkoI72JYkywCbNLS_8Uy7-ITl2FrTQvacZEIRqoTyqawfmc9UVi_9k3jfs5R4-PivR7bTV4ekBfkWINanhdlE3rRmlCX7RWZpscX7Y0B8pYYWut62SYENoh9EvgrpdYiFzI9ZMQsFNqO5PsA3rgwCi99Oqk57G5Pb2M=C33E042D";
+                string URL = "geek1121.atlassian.net";
+
+                var client = new RestClient("https://" + URL + "/rest/api/2/issue/");
+                client.Authenticator = new HttpBasicAuthenticator(username, password);
+                var request = new RestRequest(Method.POST);
+                var str = @"{""fields"":{""project"":{""key"": ""TSA"" },""summary"": ""@REST ye merry gentlemen Test1234.@"",
+                                       ""description"": ""new intit"",""issuetype"": {""name"": ""Bug"", ""epic"" :""@https://geek1121.atlassian.net/browse/TSE-1@""}}}";
+                JObject json = JObject.Parse(str);
+                //request.AddJsonBody(json);
+                request.AddHeader("Accept", "application/json");
+                request.AddHeader("Cache-Control", "no-cache");
+                request.AddHeader("Content-Type", "application/json");
+                request.AddParameter("application/json", json, ParameterType.RequestBody);
+                IRestResponse response = client.Execute(request);
+               // Console.WriteLine("Issue: {0} successfully created", response.Content);
+
+
+                // Return the select list as JSON.
+                return Json(response.Content);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("An error occurred while processing your request. Please try again later.");
+            }
+        }
+
+        //public IActionResult SendDetailTosJiraAPI()
+        //{
+
+        //    string apiUrl = @"https://URL/rest/api/3/search?jql=project=ProjectName&maxResults=10";
+
+
+        //    using (var httpClient = new HttpClient())
+        //    {
+        //        using (var request = new HttpRequestMessage(new HttpMethod("GET"), apiUrl))
+        //        {
+        //            var base64authorization =
+        //                Convert.ToBase64String(Encoding.ASCII.GetBytes("emailId:CU2NhBYhT2Di48DA9"));
+        //            request.Headers.TryAddWithoutValidation("Authorization", $"Basic {base64authorization}");
+
+        //            var response = await httpClient.SendAsync(request);
+
+        //            // I can Json response in this variable 
+        //            var jsonString = await response.Content.ReadAsStringAsync();
+
+        //            // How to populate the response object
+        //            var jsonContent = JsonConvert.DeserializeObject<JiraResponse>(jsonString);
+        //        }
+        //    }
+        //}
+        //private string RestCall()
+        //{
+        //    var result = string.Empty;
+        //    try
+        //    {
+        //        string url = "\"https://geek1121.atlassian.net\";
+        //        var client = new RestClient(url + "/rest/api/2/search?jql=");
+        //        var request = new RestRequest
+        //        {
+        //            Method = Method.GET,
+        //            RequestFormat = DataFormat.Json
+        //        };
+        //        request.AddHeader("Authorization", "Basic " + api_token);
+        //        var response = client.Execute(request);
+        //        result = response.Content;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //    return result;
+        //}
     }
  
 }
